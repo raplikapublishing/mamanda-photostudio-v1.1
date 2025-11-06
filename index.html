@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mamanda PhotoStudio - AI Photography Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #94A3B8; /* neutral-400 */
+        border-radius: 10px;
+      }
+      .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #475569; /* neutral-600 */
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #64748B; /* neutral-500 */
+      }
+       .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #334155; /* neutral-700 */
+      }
+    </style>
+    <script>
+      // Set theme on initial load to prevent FOUC
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            animation: {
+              shimmer: 'shimmer 1.5s infinite linear',
+            },
+            keyframes: {
+              shimmer: {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' },
+              },
+            },
+            colors: {
+              'primary-orange-light': '#FB923C',
+              'primary-orange': '#F97316',
+              'primary-dark': '#EA580C',
+              'neutral-900': '#0F172A', // text-primary
+              'neutral-800': '#1E293B',
+              'neutral-700': '#334155',
+              'neutral-600': '#475569', // text-secondary
+              'neutral-500': '#64748B',
+              'neutral-400': '#94A3B8', // text-muted
+              'neutral-300': '#CBD5E1', // border-default
+              'neutral-200': '#E2E8F0', // border-light
+              'neutral-100': '#F1F5F9', // bg-tertiary
+              'neutral-50':  '#F8FAFC',  // bg-secondary
+              'success': '#10B981',
+              'warning': '#F59E0B',
+              'error': '#EF4444',
+              'info': '#3B82F6',
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^0.14.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-neutral-50 dark:bg-neutral-900">
+    <div id="root"></div>
+  </body>
+</html>
