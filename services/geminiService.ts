@@ -145,10 +145,27 @@ export const generatePhotography = async (sourceImages: SourceImages, config: Ge
 
     const parts = [mainImagePart, textPart];
 
+    // +++ TAMBAHAN: Buat pemetaan untuk API +++
+    const aspectRatioMap = {
+      'square': 'SQUARE',
+      'portrait': 'PORTRAIT',
+      'landscape': 'LANDSCAPE',
+      'story': 'STORY',
+    };
+    
+    // Ambil nilai yang benar untuk API, default ke SQUARE jika tidak ada
+    const apiAspectRatio = aspectRatioMap[config.aspectRatio] || 'SQUARE';
+
     const generateSingleImage = async (): Promise<string> => {
         const result = await ai.models.generateContent({
             model: model,
             contents: { parts: parts },
+
+            // +++ PERBAIKAN: Tambahkan generationConfig di sini +++
+            generationConfig: {
+                aspectRatio: apiAspectRatio,
+            },
+
             config: {
                 responseModalities: [Modality.IMAGE, Modality.TEXT],
             },
