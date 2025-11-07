@@ -20,16 +20,88 @@ import {
 } from '../constants';
 import type { StyleOption } from '../constants';
 
-const fileToGenerativePart = async (file: File) => {
-    const base64EncodedDataPromise = new Promise<string>((resolve) => {
+/**
+ * UTILITY BARU KRITIS: Memaksa gambar input ke Aspect Ratio yang benar sebelum dikirim ke AI.
+ * Ini adalah solusi terakhir untuk mengatasi bias model I2I dengan memotong gambar input secara fisik.
+ */
+const recomposeImageToDataUrl = (file: File, aspectRatio: GenerationConfig['aspectRatio']): Promise<string> => {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return reject(new Error('Failed to get canvas context.'));
+
+                const inputWidth = img.width;
+                const inputHeight = img.height;
+                let targetRatio = 1;
+
+                switch (aspectRatio) {
+                    case 'portrait': targetRatio = 3 / 4; break;
+                    case 'landscape': targetRatio = 16 / 9; break;
+                    case 'story': targetRatio = 9 / 16; break;
+                    case 'square': 
+                    default: targetRatio = 1; break;
+                }
+                
+                const inputRatio = inputWidth / inputHeight;
+                let sourceX, sourceY, sourceW, sourceH; // Area yang akan dipotong dari gambar input
+
+                // Tentukan area sumber (W dan H) agar rasionya sama dengan targetRatio
+                if (inputRatio > targetRatio) {
+                    // Input lebih lebar dari target (misal: input landscape, target square/portrait) -> Potong lebar
+                    sourceH = inputHeight;
+                    sourceW = inputHeight * targetRatio;
+                    sourceX = (inputWidth - sourceW) / 2;
+                    sourceY = 0;
+
+                } else if (inputRatio < targetRatio) {
+                    // Input lebih tinggi dari target (misal: input portrait, target square/landscape) -> Potong tinggi
+                    sourceW = inputWidth;
+                    sourceH = inputWidth / targetRatio;
+                    sourceX = 0;
+                    sourceY = (inputHeight - sourceH) / 2;
+
+                } else {
+                    // Rasio sudah cocok, tidak perlu potong
+                    sourceW = inputWidth;
+                    sourceH = inputHeight;
+                    sourceX = 0;
+                    sourceY = 0;
+                }
+                
+                // Set ukuran canvas baru sama dengan area yang dipotong (sourceW x sourceH)
+                canvas.width = sourceW; 
+                canvas.height = sourceH;
+                
+                // Draw only the cropped part of the input image onto the new canvas
+                // Parameter: drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
+                ctx.drawImage(img, sourceX, sourceY, sourceW, sourceH, 0, 0, sourceW, sourceH);
+
+                resolve(canvas.toDataURL('image/png'));
+
+            };
+            img.onerror = reject;
+            img.src = event.target?.result as string;
+        };
+        reader.onerror = reject;
         reader.readAsDataURL(file);
     });
-    return {
-        inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
-    };
 };
+
+
+const dataURLToGenerativePart = (dataUrl: string) => {
+    const [mimePart, base64Part] = dataUrl.split(',');
+    const mimeTypeMatch = mimePart.match(/:(.*?);/);
+    const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/png';
+    
+    return {
+        inlineData: { data: base64Part, mimeType: mimeType },
+    };
+}
+
 
 const allPoseOptions = [
     ...FAMILY_POSE_STYLES,
@@ -91,8 +163,8 @@ export const buildPrompt = (config: GenerationConfig, hasReferenceImage: boolean
                 ratioDescription = ratioName;
         }
         
-        // PERBAIKAN FINAL DAN EKSTREM: Perintah yang paling dominan
-        aspectRatioInstruction = `Aspek rasio gambar **HARUS** diubah menjadi ${ratioDescription}. **Anda harus MENGABAIKAN aspek rasio foto input**. Lakukan pemotongan (cropping) yang cerdas atau perluasan latar belakang (outpainting) untuk memastikan subjek utama tetap proporsional dan terbingkai dengan sempurna di dalam RASIO OUTPUT yang baru.`;
+        // Prompt disederhanakan dan menjadi penegasan, karena gambar input sudah diubah rasionya
+        aspectRatioInstruction = `Aspek rasio gambar **SUDAH** dalam rasio ${ratioDescription}. Pastikan komposisi subjek berada di tengah bingkai rasio ini.`;
     }
 
     let ageInstruction = '';
@@ -140,7 +212,10 @@ export const generatePhotography = async (sourceImages: SourceImages, config: Ge
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const model = 'gemini-2.5-flash-image';
     
-    const mainImagePart = await fileToGenerativePart(sourceImages.main);
+    // PERBAIKAN KRITIS: Pre-process gambar utama SEBELUM dikirim ke API
+    const precomposedDataUrl = await recomposeImageToDataUrl(sourceImages.main, config.aspectRatio);
+    const mainImagePart = dataURLToGenerativePart(precomposedDataUrl);
+
     const textPrompt = buildPrompt(config, false); // hasReferenceImage is always false now
     const textPart = { text: textPrompt };
 
@@ -164,7 +239,7 @@ export const generatePhotography = async (sourceImages: SourceImages, config: Ge
 
            // +++ PERBAIKAN: Tambahkan generationConfig di sini +++
             generationConfig: {
-                // Perubahan PENTING: Tambahkan nesting imageGenerationConfig
+                // Konfigurasi API ini sekarang akan bekerja karena input gambarnya sendiri sudah sesuai rasio
                 imageGenerationConfig: { 
                     aspectRatio: apiAspectRatio,
                 }
