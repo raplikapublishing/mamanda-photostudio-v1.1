@@ -185,5 +185,20 @@ export const CHILDREN_BACKGROUNDS: StyleOption[] = [
 ];
 
 
-export const SYSTEM_PROMPT_TEMPLATE = `Sebuah foto {{photo_type}} profesional, realistis, dan berkualitas tinggi yang menampilkan subjek dari foto yang diunggah. {{gender_instruction}}{{ethnicity_instruction}}{{age_instruction}}Gaya pose: "{{pose_style}}". Latar belakang: "{{background_style}}". {{clothing_material_instruction}}{{aspect_ratio_instruction}}Instruksi tambahan: "{{extra_instructions}}". PENTING: Wajah subjek harus selalu terlihat jelas dan tidak terhalang oleh apapun (seperti tangan atau rambut). Untuk setiap gambar yang dihasilkan, berikan sedikit variasi pada sudut kamera, komposisi, dan ekspresi subjek agar setiap hasil terasa unik seolah-olah diambil dari sesi foto yang sama. SANGAT PENTING: Jika subjek pada foto yang diunggah adalah MANEKIN, ubah menjadi model manusia (anak-anak) yang realistis dan fotogenik, mengenakan pakaian yang sama persis. HILANGKAN SEMUA ELEMEN MANEKIN, TERUTAMA DUDUKAN TIANG SILVER DI BAWAH KAKI, dan pastikan tidak ada bagian manekin yang terlihat sama sekali. Jika subjek pada foto asli adalah MANUSIA, pastikan semua gambar yang dihasilkan menampilkan ORANG YANG SAMA PERSIS dari foto asli. Jangan mengubah wajah atau identitas subjek sama sekali. Pertahankan subjek asli dari foto, termasuk wajah, pakaian, dan penampilan umum, namun tingkatkan kualitas foto secara keseluruhan menjadi terlihat seperti hasil jepretan fotografer profesional. Pencahayaan harus natural dan menarik, dengan depth of field yang sesuai. Hanya hasilkan gambar final, jangan tambahkan teks deskriptif apapun.
-`;
+export const SYSTEM_PROMPT_TEMPLATE = Sebuah foto fashion profesional dan sangat realistis yang menampilkan model anak perempuan Indonesia usia sekitar 10 tahun.
+Model mengenakan pakaian yang sama persis seperti pada foto referensi (termasuk warna, bahan, dan motif).
+
+Pose: berdiri di studio, ekspresi lembut dan senyum kecil.
+Latar belakang: studio berwarna abu-abu muda, lembut, dan bersih.
+Pencahayaan: natural daylight dengan bayangan lembut, menyerupai hasil pemotretan profesional.
+Bahan pakaian: jersey atau combed cotton yang tampak rapi dan sudah disetrika.
+
+⚠️ Aspek rasio: Gunakan aspek rasio yang telah dipilih di konfigurasi AI Studio. Sesuaikan framing, komposisi, dan latar agar subjek tetap utuh, proporsional, dan menjadi fokus utama dalam rasio tersebut.
+
+⚠️ Jika foto referensi adalah manekin: ubah menjadi model manusia (anak Indonesia) yang realistis dan fotogenik, mengenakan pakaian yang sama, tanpa elemen manekin atau tiang penyangga.
+
+⚠️ Jika foto referensi adalah manusia: pertahankan wajah dan identitas asli, jangan ubah ciri-cirinya.
+
+Pastikan wajah terlihat jelas dan tidak terhalang rambut atau tangan.
+Komposisi harus rapi dan seimbang seperti hasil fotografer profesional.
+Jangan tambahkan teks, watermark, atau elemen tambahan di gambar.

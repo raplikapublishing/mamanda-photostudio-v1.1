@@ -161,9 +161,12 @@ export const generatePhotography = async (sourceImages: SourceImages, config: Ge
             model: model,
             contents: { parts: parts },
 
-            // +++ PERBAIKAN: Tambahkan generationConfig di sini +++
+           // +++ PERBAIKAN: Tambahkan generationConfig di sini +++
             generationConfig: {
-                aspectRatio: apiAspectRatio,
+                // Perubahan PENTING: Tambahkan nesting imageGenerationConfig
+                imageGenerationConfig: { 
+                    aspectRatio: apiAspectRatio,
+                }
             },
 
             config: {
