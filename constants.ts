@@ -1,5 +1,3 @@
-// raplikapublishing/mamanda-photostudio-v1.1/mamanda-photostudio-v1.1-107191209484d082a9590b1f7473faface0f07fa/constants.ts
-
 export type StyleOption = {
   id: string;
   name_id: string;

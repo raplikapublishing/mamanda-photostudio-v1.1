@@ -296,11 +296,17 @@ const App: React.FC = () => {
         }
     };
 
+    // PERBAIKAN KRUSIAL: handleImageChange untuk Logo Persistence
     const handleImageChange = (type: 'main' | 'reference', file: File | null) => {
-        setSourceImages(prev => ({ ...prev, [type]: file }));
-        if (type === 'main' && !file) { // If main image is removed
-            setSourceImages(prev => ({ ...prev, reference: null })); // Also remove logo
-        }
+        
+        // Hanya update state yang spesifik, mempertahankan state lainnya.
+        setSourceImages(prev => {
+            // Logika persisten: Saat 'main' diubah, 'reference' (logo) tetap dipertahankan
+            // karena kita hanya menggunakan spread syntax.
+            return { ...prev, [type]: file };
+        });
+
+        // Reset hasil hanya jika foto utama diubah.
         if (type === 'main') {
             setResults(Array.from({ length: 6 }, (_, i) => ({ id: i, status: 'empty' })));
             setError(null);
@@ -365,7 +371,7 @@ const App: React.FC = () => {
     }, [sourceImages, config, history, t]);
 
     const handleUpscaleAll = useCallback(async () => {
-        const targets = results.filter(r => r.status === 'completed' && !r.upscaledImageUrl);
+        const targets = results.filter(r => r.status === 'completed' && r.data?.imageUrl && !r.upscaledImageUrl);
         if (targets.length === 0) return;
 
         setIsUpscaling(true);
@@ -388,7 +394,7 @@ const App: React.FC = () => {
                     upscaledImageUrl = await applyWatermark(upscaledImageUrl, logoDataUrl);
                 }
 
-                return { id: result.id, upscaledImageUrl, error: null };
+                return { id: result.id, upscaledImageUrl: null, error: e as Error };
             } catch (e) {
                 console.error(`Upscale failed for result ${result.id}:`, e);
                 return { id: result.id, upscaledImageUrl: null, error: e as Error };

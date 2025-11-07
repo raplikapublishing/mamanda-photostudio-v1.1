@@ -21,9 +21,8 @@ import {
 import type { StyleOption } from '../constants';
 
 /**
- * UTILITY BARU KRITIS: Memaksa gambar input ke Aspect Ratio yang benar sebelum dikirim ke AI.
- * Ini adalah solusi terakhir untuk mengatasi bias model I2I dengan memotong gambar input secara fisik.
- * Perbaikan: Menggunakan kompresi JPEG (0.95) untuk mengurangi ukuran payload.
+ * UTILITY KRITIS: Memaksa gambar input ke Aspect Ratio yang benar dengan cropping, 
+ * dan mengkompresi ke JPEG untuk mengurangi ukuran payload data.
  */
 const recomposeImageToDataUrl = (file: File, aspectRatio: GenerationConfig['aspectRatio']): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -52,21 +51,21 @@ const recomposeImageToDataUrl = (file: File, aspectRatio: GenerationConfig['aspe
 
                 // Tentukan area sumber (W dan H) agar rasionya sama dengan targetRatio
                 if (inputRatio > targetRatio) {
-                    // Input lebih lebar dari target (misal: input landscape, target square/portrait) -> Potong lebar
+                    // Input lebih lebar dari target -> Potong lebar
                     sourceH = inputHeight;
                     sourceW = inputHeight * targetRatio;
                     sourceX = (inputWidth - sourceW) / 2;
                     sourceY = 0;
 
                 } else if (inputRatio < targetRatio) {
-                    // Input lebih tinggi dari target (misal: input portrait, target square/landscape) -> Potong tinggi
+                    // Input lebih tinggi dari target -> Potong tinggi
                     sourceW = inputWidth;
                     sourceH = inputWidth / targetRatio;
                     sourceX = 0;
                     sourceY = (inputHeight - sourceH) / 2;
 
                 } else {
-                    // Rasio sudah cocok, tidak perlu potong
+                    // Rasio sudah cocok
                     sourceW = inputWidth;
                     sourceH = inputHeight;
                     sourceX = 0;
@@ -78,11 +77,10 @@ const recomposeImageToDataUrl = (file: File, aspectRatio: GenerationConfig['aspe
                 canvas.height = sourceH;
                 
                 // Draw only the cropped part of the input image onto the new canvas
-                // Parameter: drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
                 ctx.drawImage(img, sourceX, sourceY, sourceW, sourceH, 0, 0, sourceW, sourceH);
 
-                // PERBAIKAN: Gunakan JPEG untuk kompresi dan mengurangi ukuran payload
-                resolve(canvas.toDataURL('image/jpeg', 0.95)); // Ganti PNG ke JPEG (kualitas 95%)
+                // Menggunakan JPEG untuk kompresi dan mengurangi ukuran payload
+                resolve(canvas.toDataURL('image/jpeg', 0.95)); 
 
             };
             img.onerror = reject;
@@ -97,7 +95,6 @@ const recomposeImageToDataUrl = (file: File, aspectRatio: GenerationConfig['aspe
 const dataURLToGenerativePart = (dataUrl: string) => {
     const [mimePart, base64Part] = dataUrl.split(',');
     const mimeTypeMatch = mimePart.match(/:(.*?);/);
-    // MIME Type sekarang akan menjadi 'image/jpeg'
     const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg'; 
     
     return {
@@ -215,7 +212,7 @@ export const generatePhotography = async (sourceImages: SourceImages, config: Ge
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const model = 'gemini-2.5-flash-image';
     
-    // PERBAIKAN KRITIS: Pre-process gambar utama SEBELUM dikirim ke API (sudah dikompresi ke JPEG)
+    // PERBAIKAN KRITIS: Pre-process gambar utama SEBELUM dikirim ke API (sudah dicrop dan dikompresi ke JPEG)
     const precomposedDataUrl = await recomposeImageToDataUrl(sourceImages.main, config.aspectRatio);
     const mainImagePart = dataURLToGenerativePart(precomposedDataUrl);
 
