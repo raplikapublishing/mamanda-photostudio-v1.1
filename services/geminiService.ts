@@ -75,13 +75,15 @@ export const buildPrompt = (config: GenerationConfig, hasReferenceImage: boolean
         let ratioDescription = '';
         switch(config.aspectRatio) {
             case 'square':
-                ratioDescription = 'persegi (1:1)';
+                // Perbaikan Aspect Ratio: Tambahkan resolusi target
+                ratioDescription = 'persegi (1:1), dengan resolusi ideal 1080x1080 piksel';
                 break;
             case 'portrait':
                 ratioDescription = 'potret (3:4), dengan resolusi ideal 1080x1440 piksel';
                 break;
             case 'landscape':
-                ratioDescription = 'lanskap (16:9)';
+                // Perbaikan Aspect Ratio: Tambahkan resolusi target
+                ratioDescription = 'lanskap (16:9), dengan resolusi ideal 1920x1080 piksel';
                 break;
             case 'story':
                 ratioDescription = 'vertikal/story (9:16), dengan resolusi ideal 1080x1920 piksel';
@@ -91,7 +93,8 @@ export const buildPrompt = (config: GenerationConfig, hasReferenceImage: boolean
                 const ratioName = getIndonesianName(config.aspectRatio, ASPECT_RATIO_OPTIONS).split(' ')[0].toLowerCase();
                 ratioDescription = ratioName;
         }
-        aspectRatioInstruction = `Aspek rasio gambar harus ${ratioDescription}. `;
+        // Perbaikan Utama Aspect Ratio: Instruksi yang sangat jelas untuk mengabaikan rasio input
+        aspectRatioInstruction = `Aspek rasio gambar **HARUS** diubah menjadi ${ratioDescription}, **terlepas dari aspek rasio foto input**. Sesuaikan framing, komposisi, dan latar agar subjek terlihat utuh dan proporsional dalam rasio ini. `;
     }
 
     let ageInstruction = '';
@@ -180,17 +183,16 @@ export const generatePhotography = async (sourceImages: SourceImages, config: Ge
         
         const imagePartResponse = result.candidates[0]?.content?.parts.find(part => part.inlineData);
 
-       if (imagePartResponse && imagePartResponse.inlineData) {
+        if (imagePartResponse && imagePartResponse.inlineData) {
             const base64ImageBytes = imagePartResponse.inlineData.data;
             return `data:${imagePartResponse.inlineData.mimeType};base64,${base64ImageBytes}`;
         } else {
             const textResponsePart = result.candidates[0]?.content?.parts.find(part => part.text);
             const textResponse = textResponsePart?.text?.trim() || "No text response found.";
             
-            console.warn("API didakt return an image. Text response:", textResponse);
+            console.warn("API did not return an image. Text response:", textResponse);
             
-            // Perbaikan: Cek jika respons hanya terdiri dari whitespace, atau blok kode markdown kosong.
-            // .replace(/`/g, '') menghapus semua backtick
+            // Perbaikan Error Handling: Cek jika respons hanya terdiri dari backtick/whitespace
             const cleanedText = textResponse.replace(/`/g, '').trim();
 
             const isEmptyOrProblematic = cleanedText.length === 0 || 
@@ -248,7 +250,7 @@ export const upscaleImage = async (base64ImageData: string, mimeType: string): P
         const base64ImageBytes = imagePartResponse.inlineData.data;
         return `data:${imagePartResponse.inlineData.mimeType};base64,${base64ImageBytes}`;
     } else {
-        const textResponse = result.text || "API did not return an upscaled image.";
+        const textResponse = result.text || "API didakt return an upscaled image.";
         console.warn("Upscale failed. Text response:", textResponse);
         throw new Error(`Gagal melakukan upscale: ${textResponse}`);
     }
