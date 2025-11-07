@@ -180,18 +180,29 @@ export const generatePhotography = async (sourceImages: SourceImages, config: Ge
         
         const imagePartResponse = result.candidates[0]?.content?.parts.find(part => part.inlineData);
 
-        if (imagePartResponse && imagePartResponse.inlineData) {
+       if (imagePartResponse && imagePartResponse.inlineData) {
             const base64ImageBytes = imagePartResponse.inlineData.data;
             return `data:${imagePartResponse.inlineData.mimeType};base64,${base64ImageBytes}`;
         } else {
             const textResponsePart = result.candidates[0]?.content?.parts.find(part => part.text);
             const textResponse = textResponsePart?.text?.trim() || "No text response found.";
             
-            console.warn("API did not return an image. Text response:", textResponse);
-            let errorMessage = "Gagal menghasilkan gambar. Coba sesuaikan prompt Anda atau gunakan gambar lain.";
-            if (textResponse && textResponse.length > 5) {
+            console.warn("API didakt return an image. Text response:", textResponse);
+            
+            // Perbaikan: Cek jika respons hanya terdiri dari whitespace, atau blok kode markdown kosong.
+            // .replace(/`/g, '') menghapus semua backtick
+            const cleanedText = textResponse.replace(/`/g, '').trim();
+
+            const isEmptyOrProblematic = cleanedText.length === 0 || 
+                                         textResponse === 'No text response found.';
+            
+            let errorMessage = "Gagal menghasilkan gambar. Model AI tidak dapat memproses permintaan ini. Coba sesuaikan konfigurasi gaya, kurangi instruksi tambahan, atau gunakan foto utama yang berbeda.";
+            
+            // Jika respons adalah teks yang substansial dan bukan hanya backtick/whitespace
+            if (!isEmptyOrProblematic) {
                 errorMessage = `Gagal menghasilkan gambar. Pesan dari AI: "${textResponse}"`;
             }
+            
             throw new Error(errorMessage);
         }
     };
