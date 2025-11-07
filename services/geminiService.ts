@@ -73,28 +73,34 @@ export const buildPrompt = (config: GenerationConfig, hasReferenceImage: boolean
     let aspectRatioInstruction = '';
     if (config.aspectRatio) {
         let ratioDescription = '';
+        let compositionInstruction = '';
+        
+        // PERBAIKAN: Menambahkan instruksi recomposition spesifik
         switch(config.aspectRatio) {
             case 'square':
-                // Perbaikan Aspect Ratio: Tambahkan resolusi target
                 ratioDescription = 'persegi (1:1), dengan resolusi ideal 1080x1080 piksel';
+                compositionInstruction = 'Jika foto input bukan persegi, lakukan **cropping secara cerdas** atau **perluas latar belakang (outpainting)** untuk memastikan subjek utama tetap fokus dan proporsional di tengah bingkai persegi.';
                 break;
             case 'portrait':
                 ratioDescription = 'potret (3:4), dengan resolusi ideal 1080x1440 piksel';
+                compositionInstruction = 'Jika foto input lanskap atau persegi, **atur ulang komposisi** ke bingkai vertikal, pastikan subjek berdiri tegak dan memenuhi tinggi bingkai potret. Tambahkan latar belakang di atas dan di bawah jika perlu (outpainting).';
                 break;
             case 'landscape':
-                // Perbaikan Aspect Ratio: Tambahkan resolusi target
                 ratioDescription = 'lanskap (16:9), dengan resolusi ideal 1920x1080 piksel';
+                compositionInstruction = 'Jika foto input potret atau persegi, **perluas latar belakang** ke samping (outpainting) dan sesuaikan komposisi agar subjek terlihat lengkap dalam bingkai lebar (landscape) 16:9.';
                 break;
             case 'story':
                 ratioDescription = 'vertikal/story (9:16), dengan resolusi ideal 1080x1920 piksel';
+                compositionInstruction = 'Jika foto input bukan 9:16, ubah komposisi ke bingkai vertikal ultra-panjang, **paksakan subjek dan latar belakang untuk mengisi** bingkai secara proporsional.';
                 break;
             default:
-                 // Fallback to keep it working if something unexpected is passed
                 const ratioName = getIndonesianName(config.aspectRatio, ASPECT_RATIO_OPTIONS).split(' ')[0].toLowerCase();
                 ratioDescription = ratioName;
+                compositionInstruction = '';
         }
-        // Perbaikan Utama Aspect Ratio: Instruksi yang sangat jelas untuk mengabaikan rasio input
-        aspectRatioInstruction = `Aspek rasio gambar **HARUS** diubah menjadi ${ratioDescription}, **terlepas dari aspek rasio foto input**. Sesuaikan framing, komposisi, dan latar agar subjek terlihat utuh dan proporsional dalam rasio ini. `;
+        
+        // Instruksi Paling Tegas
+        aspectRatioInstruction = `Aspek rasio gambar **WAJIB** diubah menjadi ${ratioDescription}. ${compositionInstruction} **Model HARUS mengabaikan dan menimpa aspek rasio foto input**. `;
     }
 
     let ageInstruction = '';
