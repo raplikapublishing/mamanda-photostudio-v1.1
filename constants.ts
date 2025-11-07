@@ -1,3 +1,5 @@
+// raplikapublishing/mamanda-photostudio-v1.1/mamanda-photostudio-v1.1-107191209484d082a9590b1f7473faface0f07fa/constants.ts
+
 export type StyleOption = {
   id: string;
   name_id: string;
@@ -186,8 +188,13 @@ export const CHILDREN_BACKGROUNDS: StyleOption[] = [
 
 
 export const SYSTEM_PROMPT_TEMPLATE = `Buatlah sebuah foto profesional dan sangat realistis berjenis {{photo_type}}.
-{{gender_instruction}}{{ethnicity_instruction}}{{age_instruction}}Subjek foto adalah orang-orang yang mengenakan pakaian yang sama persis seperti pada foto referensi (termasuk warna, bahan, dan motif).
 
+**KEPATUHAN VISUAL MUTLAK TERHADAP FOTO REFERENSI:**
+- Model **WAJIB** mengenakan pakaian **YANG SAMA PERSIS** seperti pada foto referensi.
+- **JANGAN** ubah warna, motif, model pakaian, atau gaya kerudung/jilbab/hijab subjek.
+- Pertahankan semua detail kecil yang terkait dengan pakaian.
+
+{{gender_instruction}}{{ethnicity_instruction}}{{age_instruction}}
 Gaya Pose: {{pose_style}}.
 Latar Belakang: {{background_style}}.
 {{clothing_material_instruction}}
