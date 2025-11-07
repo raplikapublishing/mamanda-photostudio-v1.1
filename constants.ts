@@ -185,20 +185,21 @@ export const CHILDREN_BACKGROUNDS: StyleOption[] = [
 ];
 
 
-export const SYSTEM_PROMPT_TEMPLATE = Sebuah foto fashion profesional dan sangat realistis yang menampilkan model anak perempuan Indonesia usia sekitar 10 tahun.
-Model mengenakan pakaian yang sama persis seperti pada foto referensi (termasuk warna, bahan, dan motif).
+export const SYSTEM_PROMPT_TEMPLATE = `Buatlah sebuah foto profesional dan sangat realistis berjenis {{photo_type}}.
+{{gender_instruction}}{{ethnicity_instruction}}{{age_instruction}}Subjek foto adalah orang-orang yang mengenakan pakaian yang sama persis seperti pada foto referensi (termasuk warna, bahan, dan motif).
 
-Pose: berdiri di studio, ekspresi lembut dan senyum kecil.
-Latar belakang: studio berwarna abu-abu muda, lembut, dan bersih.
-Pencahayaan: natural daylight dengan bayangan lembut, menyerupai hasil pemotretan profesional.
-Bahan pakaian: jersey atau combed cotton yang tampak rapi dan sudah disetrika.
+Gaya Pose: {{pose_style}}.
+Latar Belakang: {{background_style}}.
+{{clothing_material_instruction}}
+Instruksi Tambahan: {{extra_instructions}}
 
-⚠️ Aspek rasio: Gunakan aspek rasio yang telah dipilih di konfigurasi AI Studio. Sesuaikan framing, komposisi, dan latar agar subjek tetap utuh, proporsional, dan menjadi fokus utama dalam rasio tersebut.
+Pencahayaan: Gunakan pencahayaan studio premium atau natural daylight dengan bayangan lembut, menyerupai hasil pemotretan profesional.
+Komposisi: Subjek harus menjadi fokus utama, berpose secara utuh (Full body atau setengah badan, tergantung pose) dan proporsional.
+{{aspect_ratio_instruction}}
 
-⚠️ Jika foto referensi adalah manekin: ubah menjadi model manusia (anak Indonesia) yang realistis dan fotogenik, mengenakan pakaian yang sama, tanpa elemen manekin atau tiang penyangga.
-
-⚠️ Jika foto referensi adalah manusia: pertahankan wajah dan identitas asli, jangan ubah ciri-cirinya.
-
-Pastikan wajah terlihat jelas dan tidak terhalang rambut atau tangan.
-Komposisi harus rapi dan seimbang seperti hasil fotografer profesional.
-Jangan tambahkan teks, watermark, atau elemen tambahan di gambar.
+Catatan Khusus:
+- JANGAN mengubah wajah, ciri-ciri, atau identitas asli subjek dari foto referensi.
+- JANGAN tambahkan teks, watermark, atau elemen yang tidak diminta di gambar.
+- Jika foto referensi adalah manekin atau pakaian kosong: ubah menjadi model manusia yang realistis, mengenakan pakaian yang sama, tanpa elemen manekin atau tiang penyangga.
+- Pertahankan kualitas gambar pada resolusi tinggi dengan detail tajam.
+`;
